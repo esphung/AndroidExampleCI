@@ -1,0 +1,36 @@
+name: Test
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install deps with Yarn
+        uses: ./.github/actions/yarn-install
+        with:
+          node-version: '22'
+          working-directory: .
+
+      - name: Format
+        run: yarn format
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Test
+        run: yarn test
+
+      - name: Upload Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage
