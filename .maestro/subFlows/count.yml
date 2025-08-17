@@ -1,0 +1,13 @@
+appId: com.androidexampleci
+name: Count Flow
+---
+- assertVisible: "Count: 0"
+- takeScreenshot: "${ARTIFACTS}/count_initial"
+- assertVisible: "Increment"
+- assertVisible: "Decrement"
+- tapOn: "Increment"
+- assertVisible: "Count: 1"
+- takeScreenshot: "${ARTIFACTS}/count_1"
+- tapOn: "Decrement"
+- assertVisible: "Count: 0"
+- takeScreenshot: "${ARTIFACTS}/count_0"

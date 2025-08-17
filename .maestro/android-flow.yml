@@ -1,0 +1,13 @@
+appId: com.androidexampleci
+name: Android E2E Flow
+env:
+  ARTIFACTS: "./.maestro/artifacts"
+---
+- launchApp:
+    appId: "com.androidexampleci"
+    clearState: true
+    stopApp: true
+- runFlow:
+    file: "./subFlows/login.yml"
+- runFlow:
+    file: "./subFlows/count.yml"

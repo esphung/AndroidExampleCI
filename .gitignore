@@ -79,3 +79,7 @@ yarn-error.log
 /coverage/lcov.info
 /coverage/*.json
 /coverage/*.xml
+
+# E2E
+
+/.maestro/artifacts/
