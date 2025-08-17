@@ -23,7 +23,6 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
-        cache: yarn
         cache-dependency-path: ${{ inputs.working-directory }}/yarn.lock
 
     - name: Cache Yarn Dependencies
