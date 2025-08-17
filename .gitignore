@@ -82,4 +82,5 @@ yarn-error.log
 
 # E2E
 
-/.maestro/artifacts/
+/.maestro/artifacts/screenshots/**
+/.maestro/artifacts/report.html

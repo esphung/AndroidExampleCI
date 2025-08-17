@@ -1,7 +1,7 @@
 appId: com.androidexampleci
 name: Android E2E Flow
 env:
-  ARTIFACTS: "./.maestro/artifacts"
+  ARTIFACTS: "./.maestro/artifacts/screenshots"
 ---
 - launchApp:
     appId: "com.androidexampleci"

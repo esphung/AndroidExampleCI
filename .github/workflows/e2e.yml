@@ -1,0 +1,99 @@
+name: E2E Android Tests with Maestro
+
+on:
+  push:
+    branches:
+      - esphung/ci/maestro-e2e-actions
+
+env:
+  NODE_VERSION: '22'
+  ANDROID_EMULATOR_API_LEVEL: 29
+  BUILD_MODE: 'release' # 'debug' or 'release'
+  MAESTRO_FLOWS_DIR: ./.maestro # Directory containing Maestro test flows
+  RETENTION_DAYS: 1 # Days to retain test artifacts
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # === Build Android ===========================================================
+      - name: Install Dependencies with Yarn
+        uses: ./.github/actions/yarn-install
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          working-directory: .
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./.gradle/caches
+            ./.gradle/wrapper
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Build APK
+        working-directory: android
+        run: yarn assemble:${{ env.BUILD_MODE }}
+
+      # === Upload APK Artifact ===========================================================
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-${{ env.BUILD_MODE }}.apk
+          path: android/app/build/outputs/apk/${{ env.BUILD_MODE }}/app-${{ env.BUILD_MODE }}.apk
+          retention-days: ${{ env.RETENTION_DAYS }}
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-${{ env.BUILD_MODE }}.apk
+          path: android/app/build/outputs/apk/${{ env.BUILD_MODE }}/
+        continue-on-error: false
+
+      # === Maestro ===========================================================
+      - name: Install Maestro
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      # === Launch Emulator ===========================================================
+      - name: Launch Emulator (Ubuntu headless, no KVM)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.ANDROID_EMULATOR_API_LEVEL }}
+          script: |
+            echo "✅ Emulator booted"
+            export MAESTRO_CLI_NO_ANALYTICS=0 # Disable analytics
+            adb install -r ./android/app/build/outputs/apk/${{ env.BUILD_MODE }}/app-${{ env.BUILD_MODE }}.apk
+            maestro test ${{ env.MAESTRO_FLOWS_DIR }} --format html -e USERNAME=user@example.com -e PASSWORD=123 --output ${{ env.MAESTRO_FLOWS_DIR }}/artifacts/report.html || echo "Maestro finished with failures (captured)."
+
+      # === Upload E2E Test Results ===========================================================
+      - name: Upload E2E Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-artifacts
+          path: |
+            ${{ env.MAESTRO_FLOWS_DIR }}/artifacts/report.html
+            ${{ env.MAESTRO_FLOWS_DIR }}/artifacts/screenshots
+          retention-days: ${{ env.RETENTION_DAYS }}

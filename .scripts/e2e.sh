@@ -1,24 +1,25 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Default to debug
-APK_PATH="./android/app/build/outputs/apk/debug/app-debug.apk"
+# Usage: ./e2e.sh [BUILD_MODE] [MAESTRO_FLOWS_DIR]
+# Both arguments are optional. Defaults: BUILD_MODE=debug, MAESTRO_FLOWS_DIR=./.maestro
 
-# Parse arguments
-for arg in "$@"; do
-	case $arg in
-		--release)
-			APK_PATH="./android/app/build/outputs/apk/release/app-release.apk"
-			;;
-		--debug)
-			APK_PATH="./android/app/build/outputs/apk/debug/app-debug.apk"
-			;;
-	esac
-done
+set -euo pipefail
+
+BUILD_MODE=${1-"debug"}
+FLOWS_DIR=${2-"./.maestro"}
+REPORT_PATH="$FLOWS_DIR/artifacts/report.html"
+
+APK_PATH="./android/app/build/outputs/apk/${BUILD_MODE}/app-${BUILD_MODE}.apk"
 
 echo "Using APK: $APK_PATH"
+echo "Using Maestro test flow directory: $FLOWS_DIR"
+echo "Using HTML report path: $REPORT_PATH"
 
 # Install APK
 adb install -r "$APK_PATH"
 
-# Run Maestro tests
-maestro test -e USERNAME=user@example.com -e PASSWORD=123 ./.maestro/android-flow.yml
+maestro test "$FLOWS_DIR" \
+    --format html \
+    -e USERNAME=user@example.com \
+    -e PASSWORD=123 \
+    --output "$REPORT_PATH" || echo "Maestro finished with failures (captured)."

@@ -14,8 +14,8 @@
     "precommit": "yarn format && yarn lint && yarn typecheck && yarn test",
     "assemble:debug": "(cd android && ./gradlew assembleDebug)",
     "assemble:release": "(cd android && ./gradlew assembleRelease)",
-    "e2e:debug": "sh ./.scripts/e2e.sh --debug",
-    "e2e:release": "sh ./.scripts/e2e.sh --release"
+    "e2e:debug": "sh ./.scripts/e2e.sh debug",
+    "e2e:release": "sh ./.scripts/e2e.sh release"
   },
   "dependencies": {
     "react": "19.1.0",
