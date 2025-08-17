@@ -1,0 +1,16 @@
+appId: com.androidexampleci
+name: Login Flow
+---
+- assertVisible: "Welcome, Guest!"
+- takeScreenshot: "${ARTIFACTS}/login-initial"
+- tapOn: "Enter username"
+- inputText: "${USERNAME}"
+- pressKey: "Enter"
+- assertVisible: "Enter password"
+- tapOn: "Enter password"
+- inputText: "${PASSWORD}"
+- pressKey: "Enter"
+- assertVisible: "Login"
+- tapOn: "Login"
+- assertVisible: "Welcome, ${USERNAME}!"
+- takeScreenshot: "${ARTIFACTS}/login-input"

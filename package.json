@@ -11,8 +11,11 @@
     "format": "npx prettier --write ./src",
     "typecheck": "npx tsc",
     "clean": "rm -rf node_modules && rm -rf android/app/build && yarn cache clean",
+    "precommit": "yarn format && yarn lint && yarn typecheck && yarn test",
     "assemble:debug": "(cd android && ./gradlew assembleDebug)",
-    "precommit": "yarn format && yarn lint && yarn typecheck && yarn test"
+    "assemble:release": "(cd android && ./gradlew assembleRelease)",
+    "e2e:debug": "sh ./.scripts/e2e.sh --debug",
+    "e2e:release": "sh ./.scripts/e2e.sh --release"
   },
   "dependencies": {
     "react": "19.1.0",
